@@ -16,7 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from shortener.views import redirect_url, shorten_url, summarize_clicks
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', shorten_url, name='shorten_url'),
+    path('<str:slug>', redirect_url, name='redirect_url'),
+    path('<str:slug>/stats/', summarize_clicks, name='summarize_clicks')
 ]
