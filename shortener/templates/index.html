@@ -95,7 +95,8 @@
                 <div class="card shadow-sm overflow-hidden">
                     <div class="list-group list-group-flush">
                         {% for url_map in url_maps %}
-                        <div class="list-group-item py-3 {% if url_map.slug == highlighted_slug %}highlight-new{% endif %}">
+                        <div
+                            class="list-group-item py-3 {% if url_map.slug == highlighted_slug %}highlight-new{% endif %}">
                             <div class="d-flex justify-content-between align-items-center">
 
                                 <div class="text-truncate me-3">
@@ -147,6 +148,15 @@
             });
         }
     </script>
+
+    // Pop up error messages
+    {% if messages %}
+    <script>
+        {% for m in messages %}
+            alert("{{ m }}");
+        {% endfor %}
+    </script>
+    {% endif %}
 </body>
 
 </html>

@@ -1,4 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db import IntegrityError
+from django.contrib import messages
 from .models import UrlMaps, Clicks
 import secrets
 
@@ -38,10 +40,17 @@ def shorten_url(request):
     """
     if request.method == 'POST':
         url = request.POST.get('url')
-        # TODO: Handle slug collisions
-        slug = generate_slug(7)
-        UrlMaps.objects.create(url=url, slug=slug)
-        # Redirect to mainpage, avoiding duplicate submission
+        # Handle slug collisions
+        retry = 0
+        while retry < 5:
+            try:
+                slug = generate_slug(7)
+                UrlMaps.objects.create(url=url, slug=slug)
+                # Redirect to main page, avoiding duplicate submission
+                return redirect('shorten_url')
+            except IntegrityError:
+                retry += 1
+        messages.error(request, "縮網址失敗，請稍候再試。")
         return redirect('shorten_url')
     url_maps = UrlMaps.objects.all().order_by('-created_at')
     return render(request, 'index.html', {'url_maps': url_maps})
