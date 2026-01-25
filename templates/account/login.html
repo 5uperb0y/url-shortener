@@ -1,0 +1,59 @@
+{% load socialaccount %}
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 | 縮網址服務</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .login-card {
+            max-width: 400px;
+            width: 90%;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-google {
+            background-color: #4285F4;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn-google:hover {
+            background-color: #357ae8;
+            color: white;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body class="d-flex align-items-center vh-100">
+
+    <div class="container d-flex justify-content-center">
+        <div class="card login-card p-4 p-md-5">
+            <div class="card-body text-center">
+                <h1 class="h3 mb-3 fw-bold text-dark">縮網址服務</h1>
+                <p class="text-muted mb-4">請使用社群帳號登入以開始使用</p>
+
+                <hr class="my-4">
+
+                <div class="d-grid gap-2">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-google btn-lg border-0">
+                        <i class="bi bi-google"></i> Google 登入
+                    </a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
