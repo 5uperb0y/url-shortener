@@ -11,3 +11,7 @@ python manage.py collectstatic --no-input
 
 # Apply any outstanding database migrations
 python manage.py migrate
+
+# Create Django Admin, setting variable in the render dashboard
+# This is a workaround because shell is a paid feature of render.com
+python manage.py createsuperuser --no-input || true
