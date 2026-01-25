@@ -25,7 +25,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'shortener'
+    # required by allauth
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # required by social account providers
+    'allauth.socialaccount.providers.google',
+    # custom apps
+    'shortener',
 ]
 
 MIDDLEWARE = [
@@ -36,6 +43,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Add the account middleware for allauth:
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'url_shortener.urls'
@@ -43,13 +52,16 @@ ROOT_URLCONF = 'url_shortener.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # Override default tempaltes, see https://docs.djangoproject.com/en/6.0/howto/overriding-templates/
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # `allauth` needs this from django
+                'django.template.context_processors.request',
             ],
         },
     },
@@ -109,6 +121,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Login Redirect
+# https://docs.djangoproject.com/en/6.0/ref/settings/#login-redirect-url
+# Redirect users directly to the service page after login, no profile page or extra steps needed.
+LOGIN_REDIRECT_URL='/'
+
+
+# Social account
+# social-only authentication (disable username/password login)
+SOCIALACCOUNT_ONLY = True
+ACCOUNT_EMAIL_VERIFICATION = 'none' # required when SOCIALACCOUNT_ONLY = True
+SOCIALACCOUNT_AUTO_SIGNUP = True    # create accounts from social login data
+SOCIALACCOUNT_LOGIN_ON_GET = True   # no intermediate confirmation page
+ACCOUNT_LOGOUT_ON_GET = True        # logout without confirmation
+
 
 try:
     from .local_settings import *

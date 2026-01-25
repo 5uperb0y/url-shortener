@@ -61,7 +61,17 @@
 </head>
 
 <body>
-
+    <nav class="navbar navbar-light bg-white shadow-sm mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1 fs-6 text-secondary">URL Shortener</span>
+            <div class="d-flex align-items-center">
+                <span class="me-3 small text-muted"><i class="bi bi-person-circle"></i> {{ user.username }}</span>
+                <a href="/accounts/logout/" class="btn btn-sm btn-outline-danger border-0">
+                    <i class="bi bi-box-arrow-right"></i> 登出
+                </a>
+            </div>
+        </div>
+    </nav>
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-9 col-lg-8">
@@ -71,7 +81,6 @@
                         縮網址
                     </h1>
                 </div>
-
                 <div class="card shadow-sm mb-5">
                     <div class="card-body p-4">
                         <form method="POST" class="input-group">
@@ -149,11 +158,12 @@
         }
     </script>
 
-    // Pop up error messages
     {% if messages %}
     <script>
+        // TODO: if a user logout and login with other account, 
+        // messages from the previous account would present
         {% for m in messages %}
-            alert("{{ m }}");
+        alert("{{ m }}");
         {% endfor %}
     </script>
     {% endif %}
