@@ -83,13 +83,25 @@
                 </div>
                 <div class="card shadow-sm mb-5">
                     <div class="card-body p-4">
-                        <form method="POST" class="input-group">
-                            {% csrf_token %}
-                            <input type="url" name="url" class="form-control form-control-lg bg-light"
-                                placeholder="在這裡輸入你的網址" required>
-                            <button type="submit" class="btn btn-primary px-4 btn-primary-lg">
-                                縮址
-                            </button>
+                        <form method="POST"> {% csrf_token %}
+                            <div class="input-group">
+                                {{ form.url }}
+                                <button type="submit" class="btn btn-primary px-4 btn-primary-lg">
+                                    縮址
+                                </button>
+                            </div>
+
+                            {% if form.url.errors %}
+                            <div class="text-danger small mt-2 ps-2">
+                                <i class="bi bi-exclamation-circle"></i> {{ form.url.errors.0 }}
+                            </div>
+                            {% endif %}
+
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-warning py-2 mt-3 small">
+                                {{ form.non_field_errors.0 }}
+                            </div>
+                            {% endif %}
                         </form>
                     </div>
                 </div>
@@ -157,16 +169,6 @@
             });
         }
     </script>
-
-    {% if messages %}
-    <script>
-        // TODO: if a user logout and login with other account, 
-        // messages from the previous account would present
-        {% for m in messages %}
-        alert("{{ m }}");
-        {% endfor %}
-    </script>
-    {% endif %}
 </body>
 
 </html>

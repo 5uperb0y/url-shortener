@@ -1,9 +1,11 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.db import IntegrityError
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from .models import UrlMaps, Clicks
 import secrets
+
+from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
+from django.shortcuts import render, get_object_or_404, redirect
+
+from .models import UrlMaps, Clicks
+from .forms import UrlForm
 
 # Create your views here.
 def get_client_ip(request):
@@ -42,21 +44,25 @@ def shorten_url(request):
     Generate 7-character slugs for urls
     """
     if request.method == 'POST':
-        url = request.POST.get('url')
-        # Handle slug collisions
-        retry = 0
-        while retry < 5:
-            try:
-                slug = generate_slug(7)
-                UrlMaps.objects.create(user=request.user, url=url, slug=slug)
-                # Redirect to main page, avoiding duplicate submission
-                return redirect('shorten_url')
-            except IntegrityError:
-                retry += 1
-        messages.error(request, "縮網址失敗，請稍候再試。")
-        return redirect('shorten_url')
+        form = UrlForm(request.POST)
+        if form.is_valid():
+            url = form.cleaned_data['url']
+
+            # Handle slug collisions
+            retry = 0
+            while retry < 5:
+                try:
+                    slug = generate_slug(7)
+                    UrlMaps.objects.create(user=request.user, url=url, slug=slug)
+                    # Redirect to main page, avoiding duplicate submission
+                    return redirect('shorten_url')
+                except IntegrityError:
+                    retry += 1
+            form.add_error(None, "縮網址失敗，請稍候再試。")
+    else:
+        form = UrlForm()
     url_maps = UrlMaps.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, 'index.html', {'url_maps': url_maps})
+    return render(request, 'index.html', {'form': form, 'url_maps': url_maps})
 
 
 @login_required
