@@ -44,7 +44,7 @@ def shorten_url(request):
     Generate 7-character slugs for urls
     """
     if request.method == 'POST':
-        form = UrlForm(request.POST)
+        form = UrlForm(request.POST, request=request)
         if form.is_valid():
             original_url = form.cleaned_data['url']
             # Handle slug collisions
@@ -62,7 +62,7 @@ def shorten_url(request):
                     attempts += 1
             form.add_error(None, "縮網址失敗，請稍候再試。")
     else:
-        form = UrlForm()
+        form = UrlForm(request=request)
     links = Link.objects.filter(user=request.user)
     return render(request, 'index.html', {'form': form, 'links': links})
 
