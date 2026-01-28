@@ -83,13 +83,25 @@
                 </div>
                 <div class="card shadow-sm mb-5">
                     <div class="card-body p-4">
-                        <form method="POST" class="input-group">
-                            {% csrf_token %}
-                            <input type="url" name="url" class="form-control form-control-lg bg-light"
-                                placeholder="在這裡輸入你的網址" required>
-                            <button type="submit" class="btn btn-primary px-4 btn-primary-lg">
-                                縮址
-                            </button>
+                        <form method="POST"> {% csrf_token %}
+                            <div class="input-group">
+                                {{ form.url }}
+                                <button type="submit" class="btn btn-primary px-4 btn-primary-lg">
+                                    縮址
+                                </button>
+                            </div>
+
+                            {% if form.url.errors %}
+                            <div class="text-danger small mt-2 ps-2">
+                                <i class="bi bi-exclamation-circle"></i> {{ form.url.errors.0 }}
+                            </div>
+                            {% endif %}
+
+                            {% if form.non_field_errors %}
+                            <div class="alert alert-warning py-2 mt-3 small">
+                                {{ form.non_field_errors.0 }}
+                            </div>
+                            {% endif %}
                         </form>
                     </div>
                 </div>
@@ -98,37 +110,37 @@
                     <h5 class="fw-bold m-0 text-secondary">
                         <i class="bi bi-clock-history me-2"></i>縮網址紀錄
                     </h5>
-                    <span class="badge bg-white text-dark border fw-normal">{{ url_maps|length }} 個連結</span>
+                    <span class="badge bg-white text-dark border fw-normal">{{ links |length }} 個連結</span>
                 </div>
 
                 <div class="card shadow-sm overflow-hidden">
                     <div class="list-group list-group-flush">
-                        {% for url_map in url_maps %}
+                        {% for link in links %}
                         <div
-                            class="list-group-item py-3 {% if url_map.slug == highlighted_slug %}highlight-new{% endif %}">
+                            class="list-group-item py-3 {% if link.slug == highlighted_slug %}highlight-new{% endif %}">
                             <div class="d-flex justify-content-between align-items-center">
 
                                 <div class="text-truncate me-3">
                                     <div class="d-flex align-items-center mb-1">
-                                        <a href="/{{ url_map.slug }}" target="_blank"
+                                        <a href="/{{ link.slug }}" target="_blank"
                                             class="fw-bold text-primary fs-5 text-decoration-none">
-                                            {{ request.get_host }}/{{ url_map.slug }}
+                                            {{ request.get_host }}/{{ link.slug }}
                                         </a>
-                                        {% if url_map.slug == highlighted_slug %}
+                                        {% if link.slug == highlighted_slug %}
                                         <span class="badge bg-primary ms-2" style="font-size: 0.6rem;">NEW</span>
                                         {% endif %}
                                     </div>
                                     <div class="url-long text-truncate">
-                                        <i class="bi bi-arrow-return-right me-1"></i> {{ url_map.url }}
+                                        <i class="bi bi-arrow-return-right me-1"></i> {{ link.url }}
                                     </div>
                                 </div>
 
                                 <div class="d-flex gap-2 flex-shrink-0">
                                     <button class="btn btn-sm btn-outline-secondary px-3"
-                                        onclick="copyTo('{{ request.get_host }}/{{ url_map.slug }}')">
+                                        onclick="copyTo('{{ request.get_host }}/{{ link.slug }}')">
                                         <i class="bi bi-clipboard"></i> 複製
                                     </button>
-                                    <a href="{% url 'summarize_clicks' url_map.slug %}"
+                                    <a href="{% url 'summarize_clicks' link.slug %}"
                                         class="btn btn-sm btn-light border px-3">
                                         <i class="bi bi-bar-chart-fill text-primary"></i> 成效
                                     </a>
@@ -143,7 +155,6 @@
                         {% endfor %}
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -157,16 +168,5 @@
             });
         }
     </script>
-
-    {% if messages %}
-    <script>
-        // TODO: if a user logout and login with other account, 
-        // messages from the previous account would present
-        {% for m in messages %}
-        alert("{{ m }}");
-        {% endfor %}
-    </script>
-    {% endif %}
 </body>
-
 </html>
