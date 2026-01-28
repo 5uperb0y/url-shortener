@@ -22,6 +22,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', shorten_url, name='shorten_url'),
-    path('<str:slug>', redirect_url, name='redirect_url'),
-    path('<str:slug>/stats/', summarize_clicks, name='summarize_clicks')
+    path('<str:query_slug>', redirect_url, name='redirect_url'),
+    path('<str:query_slug>/stats/', summarize_clicks, name='summarize_clicks')
 ]

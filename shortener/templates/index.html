@@ -110,37 +110,37 @@
                     <h5 class="fw-bold m-0 text-secondary">
                         <i class="bi bi-clock-history me-2"></i>縮網址紀錄
                     </h5>
-                    <span class="badge bg-white text-dark border fw-normal">{{ url_maps|length }} 個連結</span>
+                    <span class="badge bg-white text-dark border fw-normal">{{ links |length }} 個連結</span>
                 </div>
 
                 <div class="card shadow-sm overflow-hidden">
                     <div class="list-group list-group-flush">
-                        {% for url_map in url_maps %}
+                        {% for link in links %}
                         <div
-                            class="list-group-item py-3 {% if url_map.slug == highlighted_slug %}highlight-new{% endif %}">
+                            class="list-group-item py-3 {% if link.slug == highlighted_slug %}highlight-new{% endif %}">
                             <div class="d-flex justify-content-between align-items-center">
 
                                 <div class="text-truncate me-3">
                                     <div class="d-flex align-items-center mb-1">
-                                        <a href="/{{ url_map.slug }}" target="_blank"
+                                        <a href="/{{ link.slug }}" target="_blank"
                                             class="fw-bold text-primary fs-5 text-decoration-none">
-                                            {{ request.get_host }}/{{ url_map.slug }}
+                                            {{ request.get_host }}/{{ link.slug }}
                                         </a>
-                                        {% if url_map.slug == highlighted_slug %}
+                                        {% if link.slug == highlighted_slug %}
                                         <span class="badge bg-primary ms-2" style="font-size: 0.6rem;">NEW</span>
                                         {% endif %}
                                     </div>
                                     <div class="url-long text-truncate">
-                                        <i class="bi bi-arrow-return-right me-1"></i> {{ url_map.url }}
+                                        <i class="bi bi-arrow-return-right me-1"></i> {{ link.url }}
                                     </div>
                                 </div>
 
                                 <div class="d-flex gap-2 flex-shrink-0">
                                     <button class="btn btn-sm btn-outline-secondary px-3"
-                                        onclick="copyTo('{{ request.get_host }}/{{ url_map.slug }}')">
+                                        onclick="copyTo('{{ request.get_host }}/{{ link.slug }}')">
                                         <i class="bi bi-clipboard"></i> 複製
                                     </button>
-                                    <a href="{% url 'summarize_clicks' url_map.slug %}"
+                                    <a href="{% url 'summarize_clicks' link.slug %}"
                                         class="btn btn-sm btn-light border px-3">
                                         <i class="bi bi-bar-chart-fill text-primary"></i> 成效
                                     </a>
@@ -155,7 +155,6 @@
                         {% endfor %}
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -170,5 +169,4 @@
         }
     </script>
 </body>
-
 </html>
