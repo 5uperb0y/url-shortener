@@ -20,17 +20,19 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
         }
 
-        .btn-google {
-            background-color: #4285F4;
-            color: white;
-            transition: opacity 0.2s;
+        .btn-social {
+            background-color: #ffffff;
+            color: #495057;
+            border: 1px solid #495057; 
+            transition: background-color 0.2s;
         }
 
-        .btn-google:hover {
-            background-color: #357ae8;
-            color: white;
-            opacity: 0.9;
+        .btn-social:hover {
+            background-color: #f8f9fa;
+            color: #495057;
+            border: 1px solid #495057;
         }
+
     </style>
 </head>
 
@@ -45,8 +47,12 @@
                 <hr class="my-4">
 
                 <div class="d-grid gap-2">
-                    <a href="{% provider_login_url 'google' %}" class="btn btn-google btn-lg border-0">
+                    <a href="{% provider_login_url 'google' %}" class="btn btn-social btn-lg">
                         <i class="bi bi-google"></i> Google 登入
+                    </a>
+
+                    <a href="{% provider_login_url 'facebook' %}" class="btn btn-social btn-lg">
+                        <i class="bi bi-facebook"></i> Facebook 登入
                     </a>
 
                 </div>
