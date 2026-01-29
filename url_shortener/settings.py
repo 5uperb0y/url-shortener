@@ -173,6 +173,12 @@ SECURE_HSTS_SECONDS=3600
 SECURE_HSTS_INCLUDE_SUBDOMAINS=True
 SECURE_HSTS_PRELOAD=True
 
+
+# Celery
+CELERY_TIMEZONE = 'Asia/Taipei'
+CELERY_TASK_SOFT_TIME_LIMIT = 10
+CELERY_TASK_TIME_LIMIT = 20 # Redirects should be fast
+
 try:
     from .local_settings import *
 except ImportError:
