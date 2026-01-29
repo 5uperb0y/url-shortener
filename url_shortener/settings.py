@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     # required by social account providers
     'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
     # custom apps
     'shortener',
 ]
@@ -149,6 +150,18 @@ ACCOUNT_EMAIL_VERIFICATION = 'none' # required when SOCIALACCOUNT_ONLY = True
 SOCIALACCOUNT_AUTO_SIGNUP = True    # create accounts from social login data
 SOCIALACCOUNT_LOGIN_ON_GET = True   # no intermediate confirmation page
 ACCOUNT_LOGOUT_ON_GET = True        # logout without confirmation
+
+# Social account provider
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'SCOPE': ['public_profile'],
+        'FIELDS': [
+            'id',
+            'name',
+        ],
+        'VERSION': 'v21.0',
+    }
+}
 
 # SSL/HTTPS settings
 # Check security settings with `python3 manage.py check --deploy`
