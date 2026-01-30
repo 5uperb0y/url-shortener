@@ -19,7 +19,8 @@ class Click(models.Model):
     """
     link = models.ForeignKey(Link, on_delete=models.CASCADE, related_name='clicks')
     ip = models.GenericIPAddressField()
+    clicked_at = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-clicked_at']
