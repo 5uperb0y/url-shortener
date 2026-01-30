@@ -2,10 +2,13 @@ import secrets
 
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.utils import timezone
+
 from django.shortcuts import render, get_object_or_404, redirect
 
 from .models import Link, Click 
 from .forms import UrlForm
+from .tasks import record_click
 
 # Create your views here.
 def get_client_ip(request):
@@ -30,10 +33,12 @@ def redirect_url(request, query_slug: str):
     Redirect slugs to their original urls
     """
     target_link = get_object_or_404(Link, slug=query_slug)
-    # TODO: It takes time to record IP addresses during redirection,
-    # especially when many people click hot URLs (e.g., google.com).
     user_ip = get_client_ip(request)
-    Click.objects.create(link=target_link, ip=user_ip)
+    record_click.delay(
+        target_link_id=target_link.id,
+        user_ip=user_ip,
+        clicked_at=timezone.now()
+    )
     return redirect(target_link.url)
 
 
