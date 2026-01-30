@@ -5,6 +5,7 @@ from django.db import IntegrityError
 from django.utils import timezone
 
 from django.shortcuts import render, get_object_or_404, redirect
+from django_ratelimit.decorators import ratelimit
 
 from .models import Link, Click 
 from .forms import UrlForm
@@ -28,6 +29,9 @@ def generate_slug(length: int = 7):
     return ''.join(secrets.choice(chars) for _ in range(length))
 
 
+
+@ratelimit(key='ip', rate='7/s', method='GET') # avg CPS ~ 6.69, above these likely bots
+@ratelimit(key='ip', rate='60/m', method='GET')
 def redirect_url(request, query_slug: str):
     """
     Redirect slugs to their original urls
@@ -44,6 +48,8 @@ def redirect_url(request, query_slug: str):
 
 # avoid unauthorized POST
 @login_required
+@ratelimit(key='user', rate='2/s', method='POST')   # revents accidental double-clicks
+@ratelimit(key='user', rate='20/m', method='POST')  # Manual testing shows ~3s per link creation
 def shorten_url(request):
     """
     Generate 7-character slugs for urls
@@ -73,6 +79,8 @@ def shorten_url(request):
 
 
 @login_required
+@ratelimit(key='user', rate='2/s', method='GET')  # include refresh
+@ratelimit(key='user', rate='20/m', method='GET')
 def summarize_clicks(request, query_slug: str):
     # Return 404 when the slug does not exist or does not belong to the current user,
     # similar to GitHub returning 404 when accessing a private repository.
