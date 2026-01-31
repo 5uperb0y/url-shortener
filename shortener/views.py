@@ -1,6 +1,7 @@
 import secrets
 
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import IntegrityError
 from django.utils import timezone
 
@@ -74,8 +75,11 @@ def shorten_url(request):
             form.add_error(None, "縮網址失敗，請稍候再試。")
     else:
         form = UrlForm(request=request)
-    links = Link.objects.filter(user=request.user)
-    return render(request, 'index.html', {'form': form, 'links': links})
+
+    links = request.user.links.all()
+    p = Paginator(links, 10)
+    page_obj = p.get_page(request.GET.get('page'))
+    return render(request, 'index.html', {'form': form, 'page_obj': page_obj})
 
 
 @login_required
@@ -85,5 +89,7 @@ def summarize_clicks(request, query_slug: str):
     # Return 404 when the slug does not exist or does not belong to the current user,
     # similar to GitHub returning 404 when accessing a private repository.
     target_link = get_object_or_404(Link, user=request.user, slug=query_slug)
-    clicks = Click.objects.filter(link=target_link)
-    return render(request, 'clicks.html', {'clicks': clicks, 'link': target_link})
+    clicks = target_link.clicks.all()
+    p = Paginator(clicks, 30)
+    page_obj = p.get_page(request.GET.get('page'))
+    return render(request, 'clicks.html', {'link': target_link, 'page_obj': page_obj})
