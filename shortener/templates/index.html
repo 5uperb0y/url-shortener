@@ -57,6 +57,44 @@
         .btn-primary-lg {
             border-radius: 0 10px 10px 0;
         }
+
+        /* 極簡分頁樣式 */
+        .pagination-minimal {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            /* 控制文字間距 */
+            padding: 1.25rem 0;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .pagination-minimal a {
+            text-decoration: none;
+            color: #0d6efd;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .pagination-minimal a:hover {
+            color: #0a58ca;
+            opacity: 0.8;
+        }
+
+        .pagination-minimal .disabled {
+            color: #dee2e6;
+            pointer-events: none;
+        }
+
+        .pagination-minimal .page-info {
+            color: #adb5bd;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
     </style>
 </head>
 
@@ -110,12 +148,12 @@
                     <h5 class="fw-bold m-0 text-secondary">
                         <i class="bi bi-clock-history me-2"></i>縮網址紀錄
                     </h5>
-                    <span class="badge bg-white text-dark border fw-normal">{{ links |length }} 個連結</span>
+                    <span class="badge bg-white text-dark border fw-normal">{{ page_obj.paginator.count }} 個連結</span>
                 </div>
 
                 <div class="card shadow-sm overflow-hidden">
                     <div class="list-group list-group-flush">
-                        {% for link in links %}
+                        {% for link in page_obj %}
                         <div
                             class="list-group-item py-3 {% if link.slug == highlighted_slug %}highlight-new{% endif %}">
                             <div class="d-flex justify-content-between align-items-center">
@@ -153,6 +191,33 @@
                             <p class="text-muted m-0">目前尚無縮網址紀錄</p>
                         </div>
                         {% endfor %}
+                        <div class="d-flex justify-content-center border-top">
+                            <div class="pagination-minimal">
+
+                                {# 上一頁 #}
+                                {% if page_obj.has_previous %}
+                                <a href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="bi bi-arrow-left"></i> 上一頁
+                                </a>
+                                {% else %}
+                                <span class="disabled"><i class="bi bi-arrow-left"></i> 上一頁</span>
+                                {% endif %}
+
+                                {# 頁數顯示 #}
+                                <span class="page-info">
+                                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                                </span>
+
+                                {# 下一頁 #}
+                                {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}">
+                                    下一頁 <i class="bi bi-arrow-right"></i>
+                                </a>
+                                {% else %}
+                                <span class="disabled">下一頁 <i class="bi bi-arrow-right"></i></span>
+                                {% endif %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
