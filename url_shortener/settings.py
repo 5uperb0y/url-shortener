@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+
 import os
 from pathlib import Path
 
@@ -58,7 +59,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Add the account middleware for allauth:
-    "allauth.account.middleware.AccountMiddleware",
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'url_shortener.urls'
@@ -87,12 +88,7 @@ WSGI_APPLICATION = 'url_shortener.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 # setting for deployments, see details at https://render.com/docs/deploy-django
-DATABASES = {
-    'default': dj_database_url.config(
-        conn_max_age=600,
-        ssl_require=True
-    )
-}
+DATABASES = {'default': dj_database_url.config(conn_max_age=600, ssl_require=True)}
 
 
 # Password validation
@@ -141,16 +137,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Login Redirect
 # https://docs.djangoproject.com/en/6.0/ref/settings/#login-redirect-url
 # Redirect users directly to the service page after login, no profile page or extra steps needed.
-LOGIN_REDIRECT_URL='/'
+LOGIN_REDIRECT_URL = '/'
 
 
 # Social account
 # social-only authentication (disable username/password login)
 SOCIALACCOUNT_ONLY = True
-ACCOUNT_EMAIL_VERIFICATION = 'none' # required when SOCIALACCOUNT_ONLY = True
-SOCIALACCOUNT_AUTO_SIGNUP = True    # create accounts from social login data
-SOCIALACCOUNT_LOGIN_ON_GET = True   # no intermediate confirmation page
-ACCOUNT_LOGOUT_ON_GET = True        # logout without confirmation
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # required when SOCIALACCOUNT_ONLY = True
+SOCIALACCOUNT_AUTO_SIGNUP = True  # create accounts from social login data
+SOCIALACCOUNT_LOGIN_ON_GET = True  # no intermediate confirmation page
+ACCOUNT_LOGOUT_ON_GET = True  # logout without confirmation
 
 # Social account provider
 SOCIALACCOUNT_PROVIDERS = {
@@ -170,15 +166,18 @@ SOCIALACCOUNT_PROVIDERS = {
 SECURE_SSL_REDIRECT = True
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SECURE_HSTS_SECONDS=3600
-SECURE_HSTS_INCLUDE_SUBDOMAINS=True
-SECURE_HSTS_PRELOAD=True
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 
 # Celery
 CELERY_TIMEZONE = 'Asia/Taipei'
 CELERY_TASK_SOFT_TIME_LIMIT = 10
-CELERY_TASK_TIME_LIMIT = 20 # Redirects should be fast
+CELERY_TASK_TIME_LIMIT = 20  # Redirects should be fast
+
+# Redis & Celery Configuration
+CELERY_BROKER_URL = os.environ.get('REDIS_URL')
 
 try:
     from .local_settings import *
