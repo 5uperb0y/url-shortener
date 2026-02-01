@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+
 # Enable & simplify the interaction between Django & server-based database
 import dj_database_url
 

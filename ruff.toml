@@ -1,0 +1,8 @@
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["I", "E", "W", "Q", "F"]
+
+[tool.ruff.format]
+quote-style = "single"

@@ -3,14 +3,14 @@ import secrets
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
-from django.shortcuts import render, get_object_or_404, redirect
 from django_ratelimit.decorators import ratelimit
 
-from .models import Link, Click 
 from .forms import UrlForm
+from .models import Link
 from .tasks import record_click
+
 
 # Create your views here.
 def get_client_ip(request):
@@ -26,12 +26,11 @@ def get_client_ip(request):
 
 
 def generate_slug(length: int = 7):
-    chars='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     return ''.join(secrets.choice(chars) for _ in range(length))
 
 
-
-@ratelimit(key='ip', rate='7/s', method='GET') # avg CPS ~ 6.69, above these likely bots
+@ratelimit( key='ip', rate='7/s', method='GET')  # avg CPS ~ 6.69, above these likely bots
 @ratelimit(key='ip', rate='60/m', method='GET')
 def redirect_url(request, query_slug: str):
     """
@@ -40,17 +39,15 @@ def redirect_url(request, query_slug: str):
     target_link = get_object_or_404(Link, slug=query_slug)
     user_ip = get_client_ip(request)
     record_click.delay(
-        target_link_id=target_link.id,
-        user_ip=user_ip,
-        clicked_at=timezone.now()
+        target_link_id=target_link.id, user_ip=user_ip, clicked_at=timezone.now()
     )
     return redirect(target_link.url)
 
 
 # avoid unauthorized POST
 @login_required
-@ratelimit(key='user', rate='2/s', method='POST')   # revents accidental double-clicks
-@ratelimit(key='user', rate='20/m', method='POST')  # Manual testing shows ~3s per link creation
+@ratelimit(key='user', rate='2/s', method='POST')  # revents accidental double-clicks
+@ratelimit( key='user', rate='20/m', method='POST')  # Manual testing shows ~3s per link creation
 def shorten_url(request):
     """
     Generate 7-character slugs for urls
@@ -67,12 +64,14 @@ def shorten_url(request):
             attempts = 0
             while attempts < 5:
                 try:
-                    Link.objects.create(user=request.user, url=original_url, slug=generate_slug(7))
+                    Link.objects.create(
+                        user=request.user, url=original_url, slug=generate_slug(7)
+                    )
                     # Redirect to main page, avoiding duplicate submission
                     return redirect('shorten_url')
                 except IntegrityError:
                     attempts += 1
-            form.add_error(None, "縮網址失敗，請稍候再試。")
+            form.add_error(None, '縮網址失敗，請稍候再試。')
     else:
         form = UrlForm(request=request)
 
