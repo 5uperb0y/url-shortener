@@ -8,7 +8,7 @@ from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
 
 from .forms import UrlForm
-from .models import Click, Link
+from .models import Link
 from .tasks import record_click
 
 
