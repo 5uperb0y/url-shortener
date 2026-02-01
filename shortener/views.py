@@ -25,12 +25,31 @@ def get_client_ip(request):
     return ip
 
 
-def generate_slug(length: int = 7):
-    chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    return ''.join(secrets.choice(chars) for _ in range(length))
+def create_new_link(current_user, original_url):
+    """
+    Creates a new Link record for the user, mapping the original URL to a unique slug.
+    """
+    available_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    slug_length = 7  # 62^7 slug space
+    max_attempts = 5  #  ~4 attempts to find a unique one when 75% occupied
+
+    # Handle slug collisions
+    attempts = 0
+    while attempts < max_attempts:
+        new_slug = ''.join(secrets.choice(available_chars) for _ in range(slug_length))
+        try:
+            new_link = Link.objects.create(
+                user=current_user, url=original_url, slug=new_slug
+            )
+            return new_link
+        except IntegrityError:
+            attempts += 1
+    return None
 
 
-@ratelimit( key='ip', rate='7/s', method='GET')  # avg CPS ~ 6.69, above these likely bots
+@ratelimit(
+    key='ip', rate='7/s', method='GET'
+)  # avg CPS ~ 6.69, above these likely bots
 @ratelimit(key='ip', rate='60/m', method='GET')
 def redirect_url(request, query_slug: str):
     """
@@ -47,7 +66,7 @@ def redirect_url(request, query_slug: str):
 # avoid unauthorized POST
 @login_required
 @ratelimit(key='user', rate='2/s', method='POST')  # revents accidental double-clicks
-@ratelimit( key='user', rate='20/m', method='POST')  # Manual testing shows ~3s per link creation
+@ratelimit(key='user', rate='20/m', method='POST')  # Manual testing shows ~3s/new link
 def shorten_url(request):
     """
     Generate 7-character slugs for urls
@@ -56,22 +75,13 @@ def shorten_url(request):
         form = UrlForm(request.POST, request=request)
         if form.is_valid():
             original_url = form.cleaned_data['url']
-            # Handle slug collisions
-            # When 75% of slug space is occupied, a 7-character slug typically requires
-            # ~4 attempts to find a unique one. If more attempts are needed, this may
-            # indicate issues beyond normal collisions
-            # See details at https://medium.com/@sandeep4.verma/system-design-scalable-url-shortener-service-like-tinyurl-106f30f23a82
-            attempts = 0
-            while attempts < 5:
-                try:
-                    Link.objects.create(
-                        user=request.user, url=original_url, slug=generate_slug(7)
-                    )
-                    # Redirect to main page, avoiding duplicate submission
-                    return redirect('shorten_url')
-                except IntegrityError:
-                    attempts += 1
-            form.add_error(None, '縮網址失敗，請稍候再試。')
+            new_link = create_new_link(
+                current_user=request.user, original_url=original_url
+            )
+            if new_link:
+                return redirect('shorten_url')
+            else:
+                form.add_error(None, '縮網址失敗，請稍候再試。')
     else:
         form = UrlForm(request=request)
 
