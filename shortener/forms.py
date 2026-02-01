@@ -1,5 +1,6 @@
 from django import forms
 
+
 class UrlForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)

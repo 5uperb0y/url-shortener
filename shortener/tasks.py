@@ -1,5 +1,7 @@
 from celery import shared_task
+
 from .models import Click
+
 
 @shared_task(ignore_result=True)
 def record_click(target_link_id: int, user_ip: str, clicked_at: str):

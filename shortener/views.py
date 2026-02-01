@@ -3,14 +3,14 @@ import secrets
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-
-from django.shortcuts import render, get_object_or_404, redirect
 from django_ratelimit.decorators import ratelimit
 
-from .models import Link, Click 
 from .forms import UrlForm
+from .models import Click, Link
 from .tasks import record_click
+
 
 # Create your views here.
 def get_client_ip(request):
