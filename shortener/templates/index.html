@@ -13,13 +13,6 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        /* 當前生成的特別標記：淡藍底與藍色邊框 */
-        .highlight-new {
-            background-color: #f0f7ff !important;
-            border: 1px solid #0d6efd !important;
-            box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.075);
-        }
-
         .url-long {
             color: #adb5bd;
             font-size: 0.85rem;
@@ -35,7 +28,6 @@
             font-weight: 500;
         }
 
-        /* 列表項目的懸浮與轉場效果 */
         .list-group-item {
             border-left: 0;
             border-right: 0;
@@ -45,10 +37,8 @@
 
         .list-group-item:hover {
             background-color: #fafafa;
-            z-index: 1;
         }
 
-        /* 輸入框組件特化 */
         .form-control-lg {
             border-radius: 10px 0 0 10px;
             border-color: #eee;
@@ -58,12 +48,10 @@
             border-radius: 0 10px 10px 0;
         }
 
-        /* 極簡分頁樣式 */
         .pagination-minimal {
             display: flex;
             align-items: center;
             gap: 1.5rem;
-            /* 控制文字間距 */
             padding: 1.25rem 0;
             font-size: 0.9rem;
             color: #6c757d;
@@ -94,7 +82,6 @@
             font-weight: 400;
             letter-spacing: 0.5px;
         }
-
     </style>
 </head>
 
@@ -103,25 +90,27 @@
         <div class="container">
             <span class="navbar-brand mb-0 h1 fs-6 text-secondary">URL Shortener</span>
             <div class="d-flex align-items-center">
-                <span class="me-3 small text-muted"><i class="bi bi-person-circle"></i> {{ user.username }}</span>
-                <a href="/accounts/logout/" class="btn btn-sm btn-outline-danger border-0">
+                <span class="me-3 small text-muted">
+                    <i class="bi bi-person-circle"></i> {{ user.username }}
+                </span>
+                <a href="{% url 'account_logout' %}" class="btn btn-sm btn-outline-danger border-0">
                     <i class="bi bi-box-arrow-right"></i> 登出
                 </a>
             </div>
         </div>
     </nav>
+
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-9 col-lg-8">
-
                 <div class="text-center mb-5">
-                    <h1 class="fw-bold text-dark display-6">
-                        縮網址
-                    </h1>
+                    <h1 class="fw-bold text-dark display-6">縮網址</h1>
                 </div>
+
                 <div class="card shadow-sm mb-5">
                     <div class="card-body p-4">
-                        <form method="POST"> {% csrf_token %}
+                        <form method="POST">
+                            {% csrf_token %}
                             <div class="input-group">
                                 {{ form.url }}
                                 <button type="submit" class="btn btn-primary px-4 btn-primary-lg">
@@ -148,25 +137,22 @@
                     <h5 class="fw-bold m-0 text-secondary">
                         <i class="bi bi-clock-history me-2"></i>縮網址紀錄
                     </h5>
-                    <span class="badge bg-white text-dark border fw-normal">{{ page_obj.paginator.count }} 個連結</span>
+                    <span class="badge bg-white text-dark border fw-normal">
+                        {{ page_obj.paginator.count }} 個連結
+                    </span>
                 </div>
 
                 <div class="card shadow-sm overflow-hidden">
                     <div class="list-group list-group-flush">
                         {% for link in page_obj %}
-                        <div
-                            class="list-group-item py-3 {% if link.slug == highlighted_slug %}highlight-new{% endif %}">
+                        <div class="list-group-item py-3">
                             <div class="d-flex justify-content-between align-items-center">
-
                                 <div class="text-truncate me-3">
                                     <div class="d-flex align-items-center mb-1">
-                                        <a href="/{{ link.slug }}" target="_blank"
+                                        <a href="{% url 'redirect_url' link.slug %}" target="_blank"
                                             class="fw-bold text-primary fs-5 text-decoration-none">
                                             {{ request.get_host }}/{{ link.slug }}
                                         </a>
-                                        {% if link.slug == highlighted_slug %}
-                                        <span class="badge bg-primary ms-2" style="font-size: 0.6rem;">NEW</span>
-                                        {% endif %}
                                     </div>
                                     <div class="url-long text-truncate">
                                         <i class="bi bi-arrow-return-right me-1"></i> {{ link.url }}
@@ -175,7 +161,7 @@
 
                                 <div class="d-flex gap-2 flex-shrink-0">
                                     <button class="btn btn-sm btn-outline-secondary px-3"
-                                        onclick="copyTo('{{ request.get_host }}/{{ link.slug }}')">
+                                        onclick="copyToClipboard('{{ request.get_host }}/{{ link.slug }}')">
                                         <i class="bi bi-clipboard"></i> 複製
                                     </button>
                                     <a href="{% url 'summarize_clicks' link.slug %}"
@@ -191,30 +177,31 @@
                             <p class="text-muted m-0">目前尚無縮網址紀錄</p>
                         </div>
                         {% endfor %}
+
                         <div class="d-flex justify-content-center border-top">
                             <div class="pagination-minimal">
-
-                                {# 上一頁 #}
                                 {% if page_obj.has_previous %}
                                 <a href="?page={{ page_obj.previous_page_number }}">
                                     <i class="bi bi-arrow-left"></i> 上一頁
                                 </a>
                                 {% else %}
-                                <span class="disabled"><i class="bi bi-arrow-left"></i> 上一頁</span>
+                                <span class="disabled">
+                                    <i class="bi bi-arrow-left"></i> 上一頁
+                                </span>
                                 {% endif %}
 
-                                {# 頁數顯示 #}
                                 <span class="page-info">
                                     {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
                                 </span>
 
-                                {# 下一頁 #}
                                 {% if page_obj.has_next %}
                                 <a href="?page={{ page_obj.next_page_number }}">
                                     下一頁 <i class="bi bi-arrow-right"></i>
                                 </a>
                                 {% else %}
-                                <span class="disabled">下一頁 <i class="bi bi-arrow-right"></i></span>
+                                <span class="disabled">
+                                    下一頁 <i class="bi bi-arrow-right"></i>
+                                </span>
                                 {% endif %}
                             </div>
                         </div>
@@ -225,13 +212,13 @@
     </div>
 
     <script>
-        function copyTo(text) {
+        function copyToClipboard(text) {
             const fullUrl = window.location.protocol + '//' + text;
             navigator.clipboard.writeText(fullUrl).then(() => {
-                // 使用簡單提示，或未來可優化為 Bootstrap Toast
                 alert('連結已複製：' + fullUrl);
             });
         }
     </script>
 </body>
+
 </html>

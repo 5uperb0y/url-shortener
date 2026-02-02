@@ -10,6 +10,7 @@
     <style>
         body {
             background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
         .url-long {
@@ -20,6 +21,7 @@
 
         .card {
             border-radius: 12px;
+            border: none;
         }
 
         .ip-code {
@@ -40,12 +42,10 @@
             border-bottom: 1px solid #eee;
         }
 
-        /* 極簡分頁樣式 */
         .pagination-minimal {
             display: flex;
             align-items: center;
             gap: 1.5rem;
-            /* 控制文字間距 */
             padding: 1.25rem 0;
             font-size: 0.9rem;
             color: #6c757d;
@@ -76,28 +76,26 @@
             font-weight: 400;
             letter-spacing: 0.5px;
         }
-
     </style>
 </head>
 
 <body>
-
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-9 col-lg-8">
-
                 <nav class="mb-4">
-                    <a href="/" class="btn btn-sm btn-link text-decoration-none text-muted p-0">
+                    <a href="{% url 'shorten_url' %}" class="btn btn-sm btn-link text-decoration-none text-muted p-0">
                         <i class="bi bi-chevron-left"></i> 返回主頁
                     </a>
                 </nav>
 
-                <div class="card border-0 shadow-sm mb-4">
+                <div class="card shadow-sm mb-4">
                     <div class="card-body p-4">
                         <div class="row align-items-center">
                             <div class="col-md-8 border-end-md">
                                 <h6 class="text-uppercase text-primary fw-bold mb-2" style="font-size: 0.75rem;">
-                                    目前分析的短網址</h6>
+                                    目前分析的短網址
+                                </h6>
                                 <h2 class="fw-bold text-dark mb-2">{{ request.get_host }}/{{ link.slug }}</h2>
                                 <div class="url-long">
                                     <i class="bi bi-link-45deg"></i> {{ link.url }}
@@ -111,9 +109,11 @@
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm overflow-hidden">
+                <div class="card shadow-sm overflow-hidden">
                     <div class="card-header bg-white py-3 border-bottom-0">
-                        <h5 class="fw-bold m-0"><i class="bi bi-list-check me-2"></i>訪客流量紀錄</h5>
+                        <h5 class="fw-bold m-0">
+                            <i class="bi bi-list-check me-2"></i>訪客流量紀錄
+                        </h5>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
@@ -127,68 +127,60 @@
                                 {% for click in page_obj %}
                                 <tr>
                                     <td class="ps-4 py-3">
-                                        <div class="fw-medium text-dark">{{ click.created_at|date:"Y-m-d" }}</div>
-                                        <div class="text-muted small">{{ click.created_at|date:"H:i:s" }}</div>
+                                        <div class="fw-medium text-dark">{{ click.clicked_at|date:"Y-m-d" }}</div>
+                                        <div class="text-muted small">{{ click.clicked_at|date:"H:i:s" }}</div>
                                     </td>
                                     <td class="pe-4 text-end">
-                                        <span class="ip-code border">
-                                            {{ click.ip }}
-                                        </span>
+                                        <span class="ip-code border">{{ click.ip }}</span>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
                                     <td colspan="2" class="text-center py-5">
-                                        <div class="text-muted">
-                                            <i class="bi bi-wind fs-1 d-block mb-3"></i>
-                                            目前還沒有任何點擊數據
-                                        </div>
+                                        <i class="bi bi-wind fs-1 text-muted d-block mb-3"></i>
+                                        <p class="text-muted m-0">目前還沒有任何點擊數據</p>
                                     </td>
                                 </tr>
                                 {% endfor %}
-
                             </tbody>
                         </table>
                     </div>
-                </div>
-                <div class="d-flex justify-content-center border-top">
-                    <div class="pagination-minimal">
 
-                        {# 上一頁 #}
-                        {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}">
-                            <i class="bi bi-arrow-left"></i> 上一頁
-                        </a>
-                        {% else %}
-                        <span class="disabled"><i class="bi bi-arrow-left"></i> 上一頁</span>
-                        {% endif %}
+                    <div class="d-flex justify-content-center border-top">
+                        <div class="pagination-minimal">
+                            {% if page_obj.has_previous %}
+                            <a href="?page={{ page_obj.previous_page_number }}">
+                                <i class="bi bi-arrow-left"></i> 上一頁
+                            </a>
+                            {% else %}
+                            <span class="disabled">
+                                <i class="bi bi-arrow-left"></i> 上一頁
+                            </span>
+                            {% endif %}
 
-                        {# 頁數顯示 #}
-                        <span class="page-info">
-                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-                        </span>
+                            <span class="page-info">
+                                {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                            </span>
 
-                        {# 下一頁 #}
-                        {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}">
-                            下一頁 <i class="bi bi-arrow-right"></i>
-                        </a>
-                        {% else %}
-                        <span class="disabled">下一頁 <i class="bi bi-arrow-right"></i></span>
-                        {% endif %}
-
+                            {% if page_obj.has_next %}
+                            <a href="?page={{ page_obj.next_page_number }}">
+                                下一頁 <i class="bi bi-arrow-right"></i>
+                            </a>
+                            {% else %}
+                            <span class="disabled">
+                                下一頁 <i class="bi bi-arrow-right"></i>
+                            </span>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-                <footer class="mt-5 mb-5 text-center">
-                    <p class="text-muted small">
-                        最後更新時間：{% now "Y-m-d H:i:s" %}
-                    </p>
-                </footer>
 
+                <footer class="mt-5 mb-5 text-center">
+                    <p class="text-muted small">最後更新時間：{% now "Y-m-d H:i:s" %}</p>
+                </footer>
             </div>
         </div>
     </div>
-
 </body>
 
 </html>
