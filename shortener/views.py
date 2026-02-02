@@ -1,8 +1,10 @@
 import secrets
 
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db import IntegrityError
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django_ratelimit.decorators import ratelimit
@@ -12,7 +14,7 @@ from .models import Link
 from .tasks import record_click
 
 
-def get_client_ip(request):
+def get_client_ip(request: HttpRequest) -> str:
     """Get the client's IP address, accounting for proxies."""
     # Source - https://stackoverflow.com/a
     # Posted by yanchenko, modified by community. See post 'Timeline' for change history
@@ -25,7 +27,7 @@ def get_client_ip(request):
     return ip
 
 
-def create_new_link(current_user, original_url):
+def create_new_link(current_user: User, original_url: str) -> Link | None:
     """Create a link and assign an unique random slug."""
     available_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     slug_length = 7  # Longer length reduces collisions with random generation (62^7 = ~3.5 trillion)
@@ -46,7 +48,7 @@ def create_new_link(current_user, original_url):
 
 @ratelimit(key='ip', rate='7/s', method='GET')  # avg CPS ~ 7, above these likely bots
 @ratelimit(key='ip', rate='60/m', method='GET')
-def redirect_url(request, query_slug: str):
+def redirect_url(request: HttpRequest, query_slug: str) -> HttpResponse:
     """Redirect slugs to their original URLs and record click events."""
     target_link = get_object_or_404(Link, slug=query_slug)
     user_ip = get_client_ip(request)
@@ -59,7 +61,7 @@ def redirect_url(request, query_slug: str):
 @login_required
 @ratelimit(key='user', rate='2/s', method='POST')  # Prevents accidental double-clicks
 @ratelimit(key='user', rate='20/m', method='POST')  # ~3s per link (manual testing)
-def shorten_url(request):
+def shorten_url(request: HttpRequest) -> HttpResponse:
     """Shorten URLs and display user's links."""
     if request.method == 'POST':
         form = UrlForm(request.POST, request=request)
@@ -84,7 +86,7 @@ def shorten_url(request):
 @login_required
 @ratelimit(key='user', rate='2/s', method='GET')  # Consider page refreshes
 @ratelimit(key='user', rate='20/m', method='GET')
-def summarize_clicks(request, query_slug: str):
+def summarize_clicks(request: HttpRequest, query_slug: str) -> HttpResponse:
     """Show click counts for a link."""
     # Return 404 when the slug does not exist or does not belong to the current user,
     # similar to GitHub returning 404 when accessing a private repository.
