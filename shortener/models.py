@@ -2,11 +2,8 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-# Create your models here.
 class Link(models.Model):
-    """
-    Map urls and their slugs
-    """
+    """Map URLs to assigned slugs for authenticated users."""
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='links')
     url = models.URLField(max_length=2048, help_text='An url to be shorten')
@@ -22,9 +19,7 @@ class Link(models.Model):
 
 
 class Click(models.Model):
-    """
-    Visitors' ip for each slug
-    """
+    """Record click events on a shortened link."""
 
     link = models.ForeignKey(Link, on_delete=models.CASCADE, related_name='clicks')
     ip = models.GenericIPAddressField()
