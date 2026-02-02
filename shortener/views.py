@@ -12,8 +12,8 @@ from .models import Link
 from .tasks import record_click
 
 
-# Create your views here.
 def get_client_ip(request):
+    """Get the client's IP address, accounting for proxies."""
     # Source - https://stackoverflow.com/a
     # Posted by yanchenko, modified by community. See post 'Timeline' for change history
     # Retrieved 2026-01-24, License - CC BY-SA 4.0
@@ -26,14 +26,11 @@ def get_client_ip(request):
 
 
 def create_new_link(current_user, original_url):
-    """
-    Creates a new Link record for the user, mapping the original URL to a unique slug.
-    """
+    """Create a link and assign an unique random slug."""
     available_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    slug_length = 7  # 62^7 slug space
-    max_attempts = 5  #  ~4 attempts to find a unique one when 75% occupied
+    slug_length = 7  # Longer length reduces collisions with random generation (62^7 = ~3.5 trillion)
+    max_attempts = 5  # Sufficient for ~4 attempts when 75% of slug space is occupied
 
-    # Handle slug collisions
     attempts = 0
     while attempts < max_attempts:
         new_slug = ''.join(secrets.choice(available_chars) for _ in range(slug_length))
@@ -42,19 +39,15 @@ def create_new_link(current_user, original_url):
                 user=current_user, url=original_url, slug=new_slug
             )
             return new_link
-        except IntegrityError:
+        except IntegrityError:  # Slug collision occurred, retry
             attempts += 1
     return None
 
 
-@ratelimit(
-    key='ip', rate='7/s', method='GET'
-)  # avg CPS ~ 6.69, above these likely bots
+@ratelimit(key='ip', rate='7/s', method='GET')  # avg CPS ~ 7, above these likely bots
 @ratelimit(key='ip', rate='60/m', method='GET')
 def redirect_url(request, query_slug: str):
-    """
-    Redirect slugs to their original urls
-    """
+    """Redirect slugs to their original URLs and record click events."""
     target_link = get_object_or_404(Link, slug=query_slug)
     user_ip = get_client_ip(request)
     record_click.delay(
@@ -63,14 +56,11 @@ def redirect_url(request, query_slug: str):
     return redirect(target_link.url)
 
 
-# avoid unauthorized POST
 @login_required
-@ratelimit(key='user', rate='2/s', method='POST')  # revents accidental double-clicks
-@ratelimit(key='user', rate='20/m', method='POST')  # Manual testing shows ~3s/new link
+@ratelimit(key='user', rate='2/s', method='POST')  # Prevents accidental double-clicks
+@ratelimit(key='user', rate='20/m', method='POST')  # ~3s per link (manual testing)
 def shorten_url(request):
-    """
-    Generate 7-character slugs for urls
-    """
+    """Shorten URLs and display user's links."""
     if request.method == 'POST':
         form = UrlForm(request.POST, request=request)
         if form.is_valid():
@@ -92,9 +82,10 @@ def shorten_url(request):
 
 
 @login_required
-@ratelimit(key='user', rate='2/s', method='GET')  # include refresh
+@ratelimit(key='user', rate='2/s', method='GET')  # Consider page refreshes
 @ratelimit(key='user', rate='20/m', method='GET')
 def summarize_clicks(request, query_slug: str):
+    """Show click counts for a link."""
     # Return 404 when the slug does not exist or does not belong to the current user,
     # similar to GitHub returning 404 when accessing a private repository.
     target_link = get_object_or_404(Link, user=request.user, slug=query_slug)

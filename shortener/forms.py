@@ -2,6 +2,10 @@ from django import forms
 
 
 class UrlForm(forms.Form):
+    """
+    Form for submitting a URL to be shortened.
+    """
+
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
@@ -22,14 +26,14 @@ class UrlForm(forms.Form):
     )
 
     def clean_url(self):
+        """Prevent self-shortening."""
         url = self.cleaned_data['url']
 
         if self.request:
             from urllib.parse import urlparse
 
-            # avoid shortening host
-            # 127.0.0.1:8000 -> 127.0.0.1
-            # https://mydomain.com/qweu -> mydomain.com
+            # Extract domains without port for comparison
+            # Examples: "127.0.0.1:8000" -> "127.0.0.1", "https://example.com/path" -> "example.com"
             current_host = self.request.get_host().split(':')[0].lower()
             url_domain = urlparse(url).netloc.split(':')[0].lower()
 
