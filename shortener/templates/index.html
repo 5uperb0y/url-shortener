@@ -168,6 +168,12 @@
                                         class="btn btn-sm btn-light border px-3">
                                         <i class="bi bi-bar-chart-fill text-primary"></i> 成效
                                     </a>
+                                    <form action="{% url 'delete_url' link.slug %}" method="POST" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger px-3">
+                                            <i class="bi bi-trash"></i> 刪除
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>

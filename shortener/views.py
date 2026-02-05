@@ -84,6 +84,17 @@ def shorten_url(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
+@ratelimit(key='user', rate='7/s', method='POST')
+@ratelimit(key='user', rate='60/m', method='POST')
+def delete_url(request: HttpRequest, query_slug: str) -> HttpResponse:
+    """Delete URLs and update user's links."""
+    target_link = get_object_or_404(Link, user=request.user, slug=query_slug)
+    if request.method == 'POST':
+        target_link.delete()
+    return redirect('shorten_url')
+
+
+@login_required
 @ratelimit(key='user', rate='2/s', method='GET')  # Consider page refreshes
 @ratelimit(key='user', rate='20/m', method='GET')
 def summarize_clicks(request: HttpRequest, query_slug: str) -> HttpResponse:
